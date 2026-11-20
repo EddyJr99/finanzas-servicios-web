@@ -26,7 +26,7 @@
 <body>
 <header>
   <h1>Servicios web - Sistema de Gestión de Finanzas Personales (SGFP)</h1>
-  <p>Spring Boot + JDBC + MySQL</p>
+  <p>Spring Boot + JDBC + MySQL · <a href="index.html" style="color:#fff">← Volver a la aplicación</a></p>
 </header>
 <main>
   <section>
@@ -54,6 +54,8 @@
 <script>
 const ID = "CAMBIE_POR_SU_ID";
 const ENDPOINTS = [
+  ["POST","/api/auth/registro","Registro: crea la cuenta con contraseña cifrada","201, 400, 409"],
+  ["POST","/api/auth/login","Inicio de sesión (autenticación)","200, 400, 401"],
   ["GET","/api/usuarios","Lista los usuarios","200"],
   ["GET","/api/usuarios/{id}","Consulta un usuario","200, 404"],
   ["POST","/api/usuarios","Crea un usuario","201, 400, 409"],
@@ -90,6 +92,7 @@ for (const [verbo, ruta, desc, resp] of ENDPOINTS) {
 }
 const j = o => JSON.stringify(o, null, 2);
 const ejemplos = {
+  "Login (POST)": ["POST", "/api/auth/login", j({correo:"demo@sgfp.com",clave:"Demo2026*"})],
   "Listar usuarios": ["GET", "/api/usuarios", ""],
   "Crear usuario (201)": ["POST", "/api/usuarios", j({nombre:"Laura Gómez",correo:"laura.gomez@example.com"})],
   "Crear usuario inválido (400)": ["POST", "/api/usuarios", j({nombre:"",correo:"no-es-correo"})],

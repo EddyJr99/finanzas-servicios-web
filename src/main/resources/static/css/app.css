@@ -1,0 +1,29 @@
+/* Ajustes del SGFP para la version conectada a la API (AA5-EV03).
+   El diseno base viene de style.css (AA4-EV03). */
+
+.form-banner.error { background: var(--expense-bg); color: var(--expense); }
+.demo-hint {
+  margin-top: 18px; padding: 10px 14px; border-radius: 8px; font-size: 0.84rem;
+  background: var(--brand-light); color: var(--brand);
+}
+.btn-del {
+  background: none; border: 1px solid var(--line); color: var(--text-soft);
+  border-radius: 6px; padding: 3px 8px; font-size: 0.78rem; cursor: pointer;
+}
+.btn-del:hover { color: var(--expense); border-color: var(--expense); }
+.amount.ingreso { color: var(--income); font-family: 'IBM Plex Mono', monospace; }
+.amount.gasto { color: var(--expense); font-family: 'IBM Plex Mono', monospace; }
+.tipo-chip { display: inline-block; font-size: 0.72rem; padding: 2px 9px; border-radius: 999px; }
+.tipo-chip.INGRESO { background: var(--income-bg); color: var(--income); }
+.tipo-chip.GASTO { background: var(--expense-bg); color: var(--expense); }
+.mini-form { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; align-items: flex-end; }
+.mini-form .field { margin-bottom: 0; flex: 1 1 140px; }
+.mini-form .btn-add { height: 40px; }
+.cards-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+.panel-msg { font-size: 0.85rem; margin-top: 10px; min-height: 1.1em; }
+.panel-msg.error { color: var(--expense); }
+.panel-msg.ok { color: var(--income); }
+.side-nav a.ext { opacity: 0.85; }
+.cards-3 .panel { overflow-x: auto; }
+.cards-3 table.moves { font-size: 0.86rem; }
+.cards-3 table.moves th, .cards-3 table.moves td { padding-left: 6px; padding-right: 6px; white-space: normal; }

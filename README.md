@@ -17,7 +17,8 @@ HTTP/JSON. Un movimiento puede repartirse entre varias categorías (tabla `detal
 - Windows: doble clic en `ejecutar_api.bat` (o `ejecutar_api.bat 9090` para otro puerto).
 - Linux/Mac: `./ejecutar_api.sh`
 
-Cuando aparezca `Started FinanzasApiApplication`, abrir **http://localhost:8080/** (documentación y probador).
+Cuando aparezca `Started FinanzasApiApplication`, abrir **http://localhost:8080/**: sale el login del SGFP.
+Desde ahí se crea la cuenta (Regístrate), se inicia sesión y se entra al dashboard. La documentación y el probador de la API están en **http://localhost:8080/api.html**.
 
 Conexión por defecto: `root` sin contraseña en `localhost:3306/sgfp`. Para cambiarla se usan las
 variables de entorno `SGFP_DB_URL`, `SGFP_DB_USER`, `SGFP_DB_PASSWORD` (o editar `application.properties`).
@@ -27,6 +28,7 @@ Documentación completa de cada servicio (rutas, campos, validaciones, ejemplos 
 
 | Recurso | Ruta base | Operaciones |
 |---|---|---|
+| Acceso | `/api/auth` | POST registro, POST login |
 | Usuarios | `/api/usuarios` | GET, GET por id, POST, PUT, DELETE |
 | Cuentas | `/api/cuentas` | GET, GET por id, POST, PUT, DELETE |
 | Medios de pago | `/api/medios-pago` | GET, GET por id, POST, PUT, DELETE |
@@ -48,13 +50,22 @@ src/main/resources/  application.properties, static/index.html (documentación +
 DOCUMENTACION_API.md · peticiones.http · ESTANDARES.md · sql/ · tools/ (Maven incluido)
 ```
 
+## Aplicación web (front-end)
+El front-end de la AA4 (login, registro y dashboard) quedó dentro de `src/main/resources/static` y ahora consume la API:
+- `index.html` y `registro.html`: inicio de sesión y creación de cuenta (`/api/auth`).
+- `dashboard.html`: ingresos, gastos, balance, historial y gasto por categoría del usuario; crear y eliminar movimientos.
+- `cuentas.html`: cuentas, categorías (ingreso o gasto) y medios de pago.
+- `api.html`: documentación y probador de los servicios.
+
 ## Despliegue con Docker en Render
 El archivo `Dockerfile` (raíz del proyecto) compila la API con Maven y la ejecuta con Java 17.
 
 - Local: `docker build -t sgfp-api .` y `docker run -p 8080:8080 -e SGFP_DB_URL=... sgfp-api`
 - Render: *New → Web Service* → conectar el repositorio de GitHub → *Language: Docker* → crear.
-  En *Environment* definir `SGFP_DB_URL`, `SGFP_DB_USER` y `SGFP_DB_PASSWORD` con los datos de una
-  base MySQL en la nube (Render no ofrece MySQL). Render envía el puerto en `PORT` y la API lo usa.
+  El Dockerfile activa el perfil `demo`: una base H2 en memoria con datos de ejemplo
+  (usuario `demo@sgfp.com`, clave `Demo2026*`), porque Render no ofrece MySQL.
+  Para usar una base MySQL en la nube: `SPRING_PROFILES_ACTIVE=default` y las variables
+  `SGFP_DB_URL`, `SGFP_DB_USER` y `SGFP_DB_PASSWORD`. Render envía el puerto en `PORT` y la API lo usa.
 
 ## Pruebas
 Desde el navegador en `http://localhost:8080/` (sección "Probar la API") o con `peticiones.http`

@@ -41,6 +41,32 @@ En los errores de validación (400), `detalles` lista cada campo con su problema
 
 ---
 
+## 0. Acceso – `/api/auth`
+
+Registro e inicio de sesión. Las contraseñas se guardan cifradas con PBKDF2 (tabla `credenciales`), nunca en texto plano.
+
+| Verbo | Ruta | Descripción | Respuestas |
+|---|---|---|---|
+| POST | `/api/auth/registro` | Crea la cuenta (nombre, correo, clave) | 201, 400, 409 |
+| POST | `/api/auth/login` | Inicia sesión con correo y clave | 200, 400, 401 |
+
+```json
+{ "nombre": "Laura Gómez", "correo": "laura.gomez@example.com", "clave": "MiClave2026" }
+```
+
+**Respuesta del login (200)**
+```json
+{ "idUsuario": 4, "nombre": "Laura Gómez", "correo": "laura.gomez@example.com", "mensaje": "Autenticacion satisfactoria. Bienvenido, Laura Gómez" }
+```
+Si el correo o la clave no son correctos responde **401** con `"mensaje": "Error en la autenticacion: correo o contrasena incorrectos"`.
+Si el correo ya tiene cuenta, el registro responde **409**.
+
+## Filtro por usuario
+
+`GET /api/movimientos`, `GET /api/cuentas` y `GET /api/resumen` aceptan `?idUsuario=N` para devolver solo los datos de ese usuario (lo usa el dashboard).
+Las categorías tienen el campo `tipo` (`INGRESO` o `GASTO`) y cada movimiento devuelve su `tipo` según sus categorías.
+El resumen incluye `totalIngresos`, `totalGastos` y `balance`.
+
 ## 1. Usuarios – `/api/usuarios`
 
 | Verbo | Ruta | Descripción | Respuestas |

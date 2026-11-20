@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Movimientos — SGFP</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<div class="mobile-topbar">
+  <div class="auth-brand" style="font-size:0.98rem;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="4" stroke="#C99A2E" stroke-width="1.6"/><path d="M7.5 14.5 10.5 11l2.3 2.3L16.5 9" stroke="#C99A2E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> SGFP</div>
+  <button id="menu-toggle" aria-expanded="false" aria-label="Abrir menú">☰ Menú</button>
+</div>
+
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="4" stroke="#C99A2E" stroke-width="1.6"/><path d="M7.5 14.5 10.5 11l2.3 2.3L16.5 9" stroke="#C99A2E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> SGFP</div>
+    <ul class="side-nav">
+      <li><a href="dashboard.html" class="active"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>Movimientos</a></li>
+      <li><a href="cuentas.html"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/></svg>Cuentas y categorías</a></li>
+      <li><a href="#" class="nav-disabled"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v18M5 8h9a3 3 0 0 1 0 6H8a3 3 0 0 0 0 6h9"/></svg>Presupuestos<span class="soon">pronto</span></a></li>
+      <li><a href="api.html" class="ext"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 7 3 12l5 5M16 7l5 5-5 5"/></svg>Documentación API</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar" id="user-avatar">--</div>
+        <div>
+          <div class="name" id="user-name"></div>
+          <div class="role" id="user-mail"></div>
+        </div>
+      </div>
+      <a href="index.html" class="logout-link" id="logout">Cerrar sesión →</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>Movimientos</h1>
+        <p class="sub" id="saludo">Registra y revisa tus ingresos y gastos.</p>
+      </div>
+      <button class="btn-add" id="open-modal">+ Nuevo movimiento</button>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card income">
+        <div class="label">Ingresos</div>
+        <div class="value mono" id="stat-ingresos">$0</div>
+      </div>
+      <div class="stat-card expense">
+        <div class="label">Gastos</div>
+        <div class="value mono" id="stat-gastos">$0</div>
+      </div>
+      <div class="stat-card balance">
+        <div class="label">Balance</div>
+        <div class="value mono" id="stat-balance">$0</div>
+      </div>
+    </div>
+
+    <div class="panel-grid">
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Historial de movimientos</h2>
+          <div class="toolbar">
+            <input type="search" id="search-input" placeholder="Buscar por descripción…">
+            <select id="filter-category">
+              <option value="">Todas las categorías</option>
+            </select>
+          </div>
+        </div>
+        <div class="panel-msg" id="lista-msg"></div>
+        <table class="moves">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Descripción</th>
+              <th>Categoría</th>
+              <th>Cuenta</th>
+              <th style="text-align:right;">Monto</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="moves-tbody"></tbody>
+        </table>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Gasto por categoría</h2>
+        </div>
+        <div id="category-bars"></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h2>Nuevo movimiento</h2>
+    <p class="lede">Registra un ingreso o un gasto.</p>
+    <div id="modal-banner" class="form-banner"></div>
+
+    <div class="type-toggle">
+      <button type="button" id="type-ingreso" class="ingreso">Ingreso</button>
+      <button type="button" id="type-gasto" class="active gasto">Gasto</button>
+    </div>
+
+    <form id="movement-form" novalidate>
+      <div class="field">
+        <label for="mov-descripcion">Descripción</label>
+        <input type="text" id="mov-descripcion" maxlength="150" placeholder="Ej. Compra en supermercado">
+        <div class="field-error" id="error-mov-descripcion"></div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="mov-monto">Monto</label>
+          <input type="number" id="mov-monto" min="0" step="1000" placeholder="0">
+          <div class="field-error" id="error-mov-monto"></div>
+        </div>
+        <div class="field">
+          <label for="mov-fecha">Fecha</label>
+          <input type="date" id="mov-fecha">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="mov-categoria">Categoría</label>
+          <select id="mov-categoria"></select>
+        </div>
+        <div class="field">
+          <label for="mov-cuenta">Cuenta</label>
+          <select id="mov-cuenta"></select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="mov-medio">Medio de pago</label>
+        <select id="mov-medio"></select>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="close-modal">Cancelar</button>
+        <button type="submit" class="btn-primary">Guardar movimiento</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>
