@@ -48,6 +48,14 @@ src/main/resources/  application.properties, static/index.html (documentación +
 DOCUMENTACION_API.md · peticiones.http · ESTANDARES.md · sql/ · tools/ (Maven incluido)
 ```
 
+## Despliegue con Docker en Render
+El archivo `Dockerfile` (raíz del proyecto) compila la API con Maven y la ejecuta con Java 17.
+
+- Local: `docker build -t sgfp-api .` y `docker run -p 8080:8080 -e SGFP_DB_URL=... sgfp-api`
+- Render: *New → Web Service* → conectar el repositorio de GitHub → *Language: Docker* → crear.
+  En *Environment* definir `SGFP_DB_URL`, `SGFP_DB_USER` y `SGFP_DB_PASSWORD` con los datos de una
+  base MySQL en la nube (Render no ofrece MySQL). Render envía el puerto en `PORT` y la API lo usa.
+
 ## Pruebas
 Desde el navegador en `http://localhost:8080/` (sección "Probar la API") o con `peticiones.http`
 (extensión *REST Client* de VS Code).

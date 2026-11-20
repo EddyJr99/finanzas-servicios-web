@@ -1,0 +1,8 @@
+# Archivos que no se copian a la imagen Docker
+.git
+target
+tools
+README.md
+ESTANDARES.md
+peticiones.http
+ejecutar_api.*
