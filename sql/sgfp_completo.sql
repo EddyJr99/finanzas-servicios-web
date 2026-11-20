@@ -80,6 +80,35 @@ CREATE TABLE IF NOT EXISTS detalle_categoria (
 ) ENGINE = InnoDB;
 
 -- ---------------------------------------------------------------------------
+-- AA5-EV03: acceso al sistema (login y registro) y tipo de categoria
+-- ---------------------------------------------------------------------------
+
+-- Contrasenas cifradas (PBKDF2). Tabla aparte para no mezclarla con los datos personales.
+CREATE TABLE IF NOT EXISTS credenciales (
+    id_usuario INT          NOT NULL,
+    clave_hash VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id_usuario),
+    CONSTRAINT fk_credenciales_usuarios
+        FOREIGN KEY (id_usuario) REFERENCES usuarios (id_usuario)
+) ENGINE = InnoDB;
+
+-- Columna tipo en categorias (INGRESO o GASTO). MySQL no tiene "ADD COLUMN IF NOT EXISTS",
+-- por eso se revisa primero en information_schema y solo se agrega si falta.
+SET @existe_tipo := (SELECT COUNT(*) FROM information_schema.COLUMNS
+                     WHERE TABLE_SCHEMA = 'sgfp' AND TABLE_NAME = 'categorias'
+                       AND COLUMN_NAME = 'tipo');
+SET @sql_tipo := IF(@existe_tipo = 0,
+    'ALTER TABLE categorias ADD COLUMN tipo VARCHAR(10) NOT NULL DEFAULT ''GASTO''',
+    'SELECT 1');
+PREPARE agregar_tipo FROM @sql_tipo;
+EXECUTE agregar_tipo;
+DEALLOCATE PREPARE agregar_tipo;
+
+-- Las categorias de entrada de dinero quedan como INGRESO.
+UPDATE categorias SET tipo = 'INGRESO'
+WHERE LOWER(nombre_categoria) IN ('salario', 'nomina', 'nómina', 'ingresos', 'ingreso extra', 'freelance');
+
+-- ---------------------------------------------------------------------------
 -- Datos de ejemplo (solo se insertan si la tabla esta vacia)
 -- ---------------------------------------------------------------------------
 
@@ -121,3 +150,7 @@ JOIN categorias c
   OR (m.descripcion = 'Recarga tarjeta de bus'  AND c.nombre_categoria = 'Transporte')
   OR (m.descripcion = 'Mercado de la semana'    AND c.nombre_categoria = 'Mercado')
 WHERE NOT EXISTS (SELECT 1 FROM detalle_categoria);
+
+-- Al final, por si los datos de ejemplo se acaban de insertar con el tipo por defecto.
+UPDATE categorias SET tipo = 'INGRESO'
+WHERE LOWER(nombre_categoria) IN ('salario', 'nomina', 'nómina', 'ingresos', 'ingreso extra', 'freelance');

@@ -20,6 +20,10 @@ COPY --from=build /app/target/*.jar app.jar
 
 # Render asigna el puerto en la variable PORT (por defecto 8080)
 ENV PORT=8080
+# Perfil demo: base H2 con datos de ejemplo (Render no tiene MySQL).
+# Para usar una base MySQL real, en Render se cambia a SPRING_PROFILES_ACTIVE=default
+# y se definen SGFP_DB_URL, SGFP_DB_USER y SGFP_DB_PASSWORD.
+ENV SPRING_PROFILES_ACTIVE=demo
 EXPOSE 8080
 
 # Datos de la base MySQL: se configuran en Render como variables de entorno
