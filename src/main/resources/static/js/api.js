@@ -17,7 +17,7 @@ var SGFP = (function () {
   }
   function cerrarSesion() {
     localStorage.removeItem(CLAVE_SESION);
-    window.location.href = 'index.html';
+    window.location.href = 'index.html?salir=1';
   }
   // Las paginas internas llaman esto: si no hay sesion, vuelven al login.
   function exigirSesion() {

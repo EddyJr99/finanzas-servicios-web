@@ -30,6 +30,14 @@ function showBanner(id, message, type) {
   if (!form) return;
   if (SGFP.sesion()) { window.location.replace('dashboard.html'); return; }
 
+  // Mensajes al llegar al login: despues de crear la cuenta o de cerrar sesion.
+  var parametros = new URLSearchParams(window.location.search);
+  if (parametros.get('registro') === 'ok') {
+    showBanner('login-banner', 'Usuario creado exitosamente. Por favor inicia sesión.', 'success');
+  } else if (parametros.get('salir') === '1') {
+    showBanner('login-banner', 'Cerraste sesión correctamente.', 'success');
+  }
+
   form.addEventListener('submit', async function (e) {
     e.preventDefault();
     var email = document.getElementById('login-email').value.trim();
@@ -105,6 +113,6 @@ function showBanner(id, message, type) {
     }
     showBanner('registro-banner', r.datos.mensaje, 'success');
     form.reset();
-    setTimeout(function () { window.location.href = 'index.html'; }, 1400);
+    setTimeout(function () { window.location.href = 'index.html?registro=ok'; }, 1400);
   });
 })();
