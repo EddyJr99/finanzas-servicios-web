@@ -13,10 +13,11 @@ import co.edu.sena.finanzas.api.dto.CategoriaResponse;
 @Repository
 public class CategoriaRepositorio extends RepositorioBase {
 
-    private static final String SQL_BASE = "SELECT id_categoria, nombre_categoria FROM categorias ";
+    private static final String SQL_BASE = "SELECT id_categoria, nombre_categoria, tipo FROM categorias ";
 
     private static final RowMapper<CategoriaResponse> MAPEADOR = (rs, fila) ->
-            new CategoriaResponse(rs.getInt("id_categoria"), rs.getString("nombre_categoria"));
+            new CategoriaResponse(rs.getInt("id_categoria"), rs.getString("nombre_categoria"),
+                    rs.getString("tipo"));
 
     public CategoriaRepositorio(JdbcTemplate jdbc) {
         super(jdbc);
@@ -36,13 +37,14 @@ public class CategoriaRepositorio extends RepositorioBase {
                 + "AND id_categoria <> ?", nombre, idExcluido) > 0;
     }
 
-    public int insertar(String nombreCategoria) {
-        return insertarYObtenerId("INSERT INTO categorias (nombre_categoria) VALUES (?)", nombreCategoria);
+    public int insertar(String nombreCategoria, String tipo) {
+        return insertarYObtenerId("INSERT INTO categorias (nombre_categoria, tipo) VALUES (?, ?)",
+                nombreCategoria, tipo);
     }
 
-    public void actualizar(int id, String nombreCategoria) {
-        jdbc.update("UPDATE categorias SET nombre_categoria = ? WHERE id_categoria = ?",
-                nombreCategoria, id);
+    public void actualizar(int id, String nombreCategoria, String tipo) {
+        jdbc.update("UPDATE categorias SET nombre_categoria = ?, tipo = ? WHERE id_categoria = ?",
+                nombreCategoria, tipo, id);
     }
 
     public int contarUsos(int id) {

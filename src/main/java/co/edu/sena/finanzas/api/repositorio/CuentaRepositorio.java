@@ -25,8 +25,12 @@ public class CuentaRepositorio extends RepositorioBase {
         super(jdbc);
     }
 
-    public List<CuentaResponse> listar() {
-        return jdbc.query(SQL_BASE + "ORDER BY c.id_cuenta", MAPEADOR);
+    /** Lista las cuentas (todas, o solo las del usuario indicado). */
+    public List<CuentaResponse> listar(Integer idUsuario) {
+        if (idUsuario == null) {
+            return jdbc.query(SQL_BASE + "ORDER BY c.id_cuenta", MAPEADOR);
+        }
+        return jdbc.query(SQL_BASE + "WHERE c.id_usuario = ? ORDER BY c.id_cuenta", MAPEADOR, idUsuario);
     }
 
     public Optional<CuentaResponse> buscarPorId(int id) {

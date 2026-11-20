@@ -38,7 +38,7 @@ public class MovimientoRepositorio {
                     + "LEFT JOIN cuentas c ON c.id_cuenta = m.id_cuenta "
                     + "LEFT JOIN medios_pago mp ON mp.id_medio_pago = m.id_medio_pago ";
     private static final String SQL_DETALLES =
-            "SELECT dc.id_movimiento, dc.id_categoria, ca.nombre_categoria, dc.monto_asignado "
+            "SELECT dc.id_movimiento, dc.id_categoria, ca.nombre_categoria, ca.tipo, dc.monto_asignado "
                     + "FROM detalle_categoria dc "
                     + "LEFT JOIN categorias ca ON ca.id_categoria = dc.id_categoria ";
     private static final String SQL_INSERTAR_MOVIMIENTO =
@@ -67,10 +67,15 @@ public class MovimientoRepositorio {
             Integer idMedioPago, String nombreMedioPago) {
     }
 
-    /** Devuelve todos los movimientos, los mas recientes primero. */
-    public List<MovimientoResponse> listar() {
+    /**
+     * Devuelve los movimientos, los mas recientes primero. Si se indica idUsuario,
+     * solo los de las cuentas de ese usuario.
+     */
+    public List<MovimientoResponse> listar(Integer idUsuario) {
+        String filtro = idUsuario == null ? "" : "WHERE c.id_usuario = ? ";
+        Object[] parametros = idUsuario == null ? new Object[0] : new Object[] {idUsuario};
         List<Fila> filas = jdbc.query(
-                SQL_MOVIMIENTOS + "ORDER BY m.fecha DESC, m.id_movimiento DESC",
+                SQL_MOVIMIENTOS + filtro + "ORDER BY m.fecha DESC, m.id_movimiento DESC",
                 (rs, numeroFila) -> new Fila(
                         rs.getInt("id_movimiento"),
                         rs.getDate("fecha").toLocalDate(),
@@ -79,7 +84,8 @@ public class MovimientoRepositorio {
                         rs.getInt("id_cuenta"),
                         rs.getString("nombre_cuenta"),
                         rs.getInt("id_medio_pago"),
-                        rs.getString("nombre_medio_pago")));
+                        rs.getString("nombre_medio_pago")),
+                parametros);
 
         // Se consultan todos los detalles de una vez y se agrupan por movimiento.
         Map<Integer, List<CategoriaAsignadaResponse>> detalles = new HashMap<>();
@@ -88,6 +94,7 @@ public class MovimientoRepositorio {
                     .add(new CategoriaAsignadaResponse(
                             rs.getInt("id_categoria"),
                             rs.getString("nombre_categoria"),
+                            rs.getString("tipo"),
                             rs.getBigDecimal("monto_asignado")));
         });
 
@@ -121,6 +128,7 @@ public class MovimientoRepositorio {
                 (rs, numeroFila) -> new CategoriaAsignadaResponse(
                         rs.getInt("id_categoria"),
                         rs.getString("nombre_categoria"),
+                        rs.getString("tipo"),
                         rs.getBigDecimal("monto_asignado")),
                 idMovimiento);
         return Optional.of(armar(filas.get(0), categorias));
@@ -172,8 +180,14 @@ public class MovimientoRepositorio {
         jdbc.update(SQL_ELIMINAR_MOVIMIENTO, idMovimiento);
     }
 
+    /**
+     * Arma la respuesta. El tipo del movimiento sale de sus categorias: si alguna es de
+     * INGRESO el movimiento es un ingreso; si no, es un gasto.
+     */
     private MovimientoResponse armar(Fila fila, List<CategoriaAsignadaResponse> categorias) {
-        return new MovimientoResponse(fila.idMovimiento(), fila.fecha(), fila.descripcion(),
+        String tipo = categorias.stream().anyMatch(c -> "INGRESO".equalsIgnoreCase(c.tipo()))
+                ? "INGRESO" : "GASTO";
+        return new MovimientoResponse(fila.idMovimiento(), tipo, fila.fecha(), fila.descripcion(),
                 fila.montoTotal(), fila.idCuenta(), fila.nombreCuenta(), fila.idMedioPago(),
                 fila.nombreMedioPago(), categorias);
     }

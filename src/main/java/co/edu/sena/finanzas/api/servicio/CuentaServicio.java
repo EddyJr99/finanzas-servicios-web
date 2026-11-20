@@ -26,8 +26,8 @@ public class CuentaServicio {
     }
 
     @Transactional(readOnly = true)
-    public List<CuentaResponse> listar() {
-        return repositorio.listar();
+    public List<CuentaResponse> listar(Integer idUsuario) {
+        return repositorio.listar(idUsuario);
     }
 
     @Transactional(readOnly = true)

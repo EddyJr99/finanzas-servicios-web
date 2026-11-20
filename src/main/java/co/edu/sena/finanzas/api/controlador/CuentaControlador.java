@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,10 +37,10 @@ public class CuentaControlador {
         this.servicio = servicio;
     }
 
-    /** GET /api/cuentas: lista todos. Responde 200. */
+    /** GET /api/cuentas: lista las cuentas; con ?idUsuario=N solo las de ese usuario. Responde 200. */
     @GetMapping
-    public List<CuentaResponse> listar() {
-        return servicio.listar();
+    public List<CuentaResponse> listar(@RequestParam(required = false) Integer idUsuario) {
+        return servicio.listar(idUsuario);
     }
 
     /** GET /api/cuentas/{id}: consulta uno. Responde 200, o 404 si no existe. */

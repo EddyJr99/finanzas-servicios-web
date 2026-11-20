@@ -73,6 +73,13 @@ public class ManejadorExcepciones {
         return construir(HttpStatus.BAD_REQUEST, excepcion.getMessage(), List.of(), solicitud);
     }
 
+    /** 401: correo o contrasena incorrectos al iniciar sesion. */
+    @ExceptionHandler(NoAutorizadoException.class)
+    public ResponseEntity<ErrorRespuesta> manejarNoAutorizado(NoAutorizadoException excepcion,
+            HttpServletRequest solicitud) {
+        return construir(HttpStatus.UNAUTHORIZED, excepcion.getMessage(), List.of(), solicitud);
+    }
+
     /** 409: la operacion choca con los datos existentes (duplicado o registro en uso). */
     @ExceptionHandler(ConflictoException.class)
     public ResponseEntity<ErrorRespuesta> manejarConflicto(ConflictoException excepcion,

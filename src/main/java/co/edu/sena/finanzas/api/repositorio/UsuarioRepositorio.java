@@ -54,7 +54,9 @@ public class UsuarioRepositorio extends RepositorioBase {
         return contar("SELECT COUNT(*) FROM cuentas WHERE id_usuario = ?", id);
     }
 
+    /** Elimina el usuario y su contrasena (la credencial se borra primero por la llave foranea). */
     public void eliminar(int id) {
+        jdbc.update("DELETE FROM credenciales WHERE id_usuario = ?", id);
         jdbc.update("DELETE FROM usuarios WHERE id_usuario = ?", id);
     }
 }

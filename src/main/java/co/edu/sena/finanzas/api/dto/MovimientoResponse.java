@@ -7,6 +7,7 @@ import java.util.List;
 /** Movimiento tal como la API lo devuelve en formato JSON. */
 public record MovimientoResponse(
         Integer idMovimiento,
+        String tipo,
         LocalDate fecha,
         String descripcion,
         BigDecimal montoTotal,

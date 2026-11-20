@@ -1,12 +1,14 @@
 package co.edu.sena.finanzas.api.servicio;
 
+import java.math.BigDecimal;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import co.edu.sena.finanzas.api.dto.ResumenResponse;
 import co.edu.sena.finanzas.api.repositorio.ResumenRepositorio;
 
-/** Arma el resumen general de las finanzas a partir de las consultas de agregacion. */
+/** Arma el resumen de las finanzas (general o de un usuario) con las consultas de agregacion. */
 @Service
 public class ResumenServicio {
 
@@ -17,9 +19,11 @@ public class ResumenServicio {
     }
 
     @Transactional(readOnly = true)
-    public ResumenResponse obtener() {
-        return new ResumenResponse(repositorio.contarMovimientos(),
-                repositorio.sumarMovimientos(), repositorio.totalesPorCategoria(),
-                repositorio.totalesPorCuenta());
+    public ResumenResponse obtener(Integer idUsuario) {
+        BigDecimal ingresos = repositorio.sumarPorTipo("INGRESO", idUsuario);
+        BigDecimal gastos = repositorio.sumarPorTipo("GASTO", idUsuario);
+        return new ResumenResponse(repositorio.contarMovimientos(idUsuario), ingresos, gastos,
+                ingresos.subtract(gastos), repositorio.totalesPorCategoria(idUsuario),
+                repositorio.totalesPorCuenta(idUsuario));
     }
 }

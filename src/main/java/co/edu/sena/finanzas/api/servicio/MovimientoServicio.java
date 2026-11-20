@@ -34,10 +34,10 @@ public class MovimientoServicio {
         this.repositorio = repositorio;
     }
 
-    /** Lista todos los movimientos. */
+    /** Lista los movimientos (todos, o solo los del usuario indicado). */
     @Transactional(readOnly = true)
-    public List<MovimientoResponse> listar() {
-        return repositorio.listar();
+    public List<MovimientoResponse> listar(Integer idUsuario) {
+        return repositorio.listar(idUsuario);
     }
 
     /** Devuelve un movimiento o lanza 404 si no existe. */

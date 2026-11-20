@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,10 +41,13 @@ public class MovimientoControlador {
         this.servicio = servicio;
     }
 
-    /** GET /api/movimientos: lista todos los movimientos. Responde 200. */
+    /**
+     * GET /api/movimientos: lista los movimientos. Con ?idUsuario=N devuelve solo los de
+     * ese usuario (lo usa el dashboard). Responde 200.
+     */
     @GetMapping
-    public List<MovimientoResponse> listar() {
-        return servicio.listar();
+    public List<MovimientoResponse> listar(@RequestParam(required = false) Integer idUsuario) {
+        return servicio.listar(idUsuario);
     }
 
     /** GET /api/movimientos/{id}: consulta un movimiento. Responde 200, o 404 si no existe. */

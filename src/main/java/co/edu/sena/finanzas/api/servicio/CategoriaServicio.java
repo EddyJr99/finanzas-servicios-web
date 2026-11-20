@@ -35,14 +35,14 @@ public class CategoriaServicio {
     @Transactional
     public CategoriaResponse crear(CategoriaRequest datos) {
         validarNombre(datos.nombreCategoria(), 0);
-        return obtener(repositorio.insertar(datos.nombreCategoria().trim()));
+        return obtener(repositorio.insertar(datos.nombreCategoria().trim(), tipo(datos)));
     }
 
     @Transactional
     public CategoriaResponse reemplazar(int id, CategoriaRequest datos) {
         obtener(id);
         validarNombre(datos.nombreCategoria(), id);
-        repositorio.actualizar(id, datos.nombreCategoria().trim());
+        repositorio.actualizar(id, datos.nombreCategoria().trim(), tipo(datos));
         return obtener(id);
     }
 
@@ -55,6 +55,11 @@ public class CategoriaServicio {
                     + " porque esta asignada a " + usos + " movimiento(s)");
         }
         repositorio.eliminar(id);
+    }
+
+    /** El tipo llega como INGRESO o GASTO (en cualquier mayuscula); si no llega, es GASTO. */
+    private String tipo(CategoriaRequest datos) {
+        return datos.tipo() == null || datos.tipo().isBlank() ? "GASTO" : datos.tipo().trim().toUpperCase();
     }
 
     private void validarNombre(String nombre, int idExcluido) {
