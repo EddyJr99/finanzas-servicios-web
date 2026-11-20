@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Servicios web - SGFP</title>
+<style>
+  body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f4f6f9;color:#1f2933}
+  header{background:#1f4e79;color:#fff;padding:18px 24px}
+  header h1{margin:0;font-size:1.3rem} header p{margin:4px 0 0;opacity:.85;font-size:.9rem}
+  main{max-width:960px;margin:20px auto;padding:0 16px}
+  section{background:#fff;border-radius:8px;padding:16px 20px;margin-bottom:16px;box-shadow:0 1px 3px #0002}
+  h2{margin-top:0;font-size:1.05rem}
+  table{border-collapse:collapse;width:100%;font-size:.9rem}
+  th,td{border-bottom:1px solid #e3e8ee;padding:6px 8px;text-align:left}
+  .m{font-weight:700;padding:2px 8px;border-radius:4px;color:#fff;font-size:.8rem}
+  .GET{background:#2e7d32}.POST{background:#1565c0}.PUT{background:#ef6c00}.PATCH{background:#6a1b9a}.DELETE{background:#c62828}
+  select,input,textarea,button{font:inherit;padding:6px 8px;border:1px solid #b8c2cc;border-radius:5px}
+  textarea{width:100%;box-sizing:border-box;font-family:Consolas,monospace;min-height:170px}
+  button{background:#1f4e79;color:#fff;border:0;cursor:pointer} button:hover{background:#163a5c}
+  .fila{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:center}
+  pre{background:#101820;color:#d6e2ee;padding:12px;border-radius:6px;overflow:auto;max-height:380px;white-space:pre-wrap}
+  .estado{font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <h1>Servicios web - Sistema de Gestión de Finanzas Personales (SGFP)</h1>
+  <p>Spring Boot + JDBC + MySQL</p>
+</header>
+<main>
+  <section>
+    <h2>Servicios disponibles</h2>
+    <p>Cada recurso ofrece GET (listar y consultar), POST, PUT y DELETE; los movimientos
+       agregan PATCH. Documentación completa: <code>DOCUMENTACION_API.md</code>.</p>
+    <table id="tabla">
+      <tr><th>Verbo</th><th>Ruta</th><th>Descripción</th><th>Respuestas</th></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Probar la API</h2>
+    <div class="fila">
+      <select id="verbo"><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option></select>
+      <input id="ruta" size="40" value="/api/movimientos">
+      <button id="enviar">Enviar</button>
+      <select id="ejemplos"><option value="">Ejemplos...</option></select>
+    </div>
+    <textarea id="cuerpo" placeholder="Cuerpo JSON (para POST, PUT y PATCH)"></textarea>
+    <p>Respuesta: <span class="estado" id="estado">-</span></p>
+    <pre id="salida">Aún no se ha enviado ninguna petición.</pre>
+  </section>
+</main>
+<script>
+const ID = "CAMBIE_POR_SU_ID";
+const ENDPOINTS = [
+  ["GET","/api/usuarios","Lista los usuarios","200"],
+  ["GET","/api/usuarios/{id}","Consulta un usuario","200, 404"],
+  ["POST","/api/usuarios","Crea un usuario","201, 400, 409"],
+  ["PUT","/api/usuarios/{id}","Reemplaza un usuario","200, 400, 404, 409"],
+  ["DELETE","/api/usuarios/{id}","Elimina un usuario (sin cuentas)","204, 404, 409"],
+  ["GET","/api/cuentas","Lista las cuentas","200"],
+  ["GET","/api/cuentas/{id}","Consulta una cuenta","200, 404"],
+  ["POST","/api/cuentas","Crea una cuenta","201, 400"],
+  ["PUT","/api/cuentas/{id}","Reemplaza una cuenta","200, 400, 404"],
+  ["DELETE","/api/cuentas/{id}","Elimina una cuenta (sin movimientos)","204, 404, 409"],
+  ["GET","/api/medios-pago","Lista los medios de pago","200"],
+  ["GET","/api/medios-pago/{id}","Consulta un medio de pago","200, 404"],
+  ["POST","/api/medios-pago","Crea un medio de pago","201, 400"],
+  ["PUT","/api/medios-pago/{id}","Reemplaza un medio de pago","200, 400, 404"],
+  ["DELETE","/api/medios-pago/{id}","Elimina un medio de pago (sin movimientos)","204, 404, 409"],
+  ["GET","/api/categorias","Lista las categorías","200"],
+  ["GET","/api/categorias/{id}","Consulta una categoría","200, 404"],
+  ["POST","/api/categorias","Crea una categoría","201, 400, 409"],
+  ["PUT","/api/categorias/{id}","Reemplaza una categoría","200, 400, 404, 409"],
+  ["DELETE","/api/categorias/{id}","Elimina una categoría (sin uso)","204, 404, 409"],
+  ["GET","/api/movimientos","Lista los movimientos","200"],
+  ["GET","/api/movimientos/{id}","Consulta un movimiento","200, 404"],
+  ["POST","/api/movimientos","Crea un movimiento con su reparto por categorías","201, 400"],
+  ["PUT","/api/movimientos/{id}","Reemplaza un movimiento","200, 400, 404"],
+  ["PATCH","/api/movimientos/{id}","Modifica campos sueltos de un movimiento","200, 400, 404"],
+  ["DELETE","/api/movimientos/{id}","Elimina un movimiento","204, 404"],
+  ["GET","/api/resumen","Totales generales, por categoría y por cuenta","200"]
+];
+for (const [verbo, ruta, desc, resp] of ENDPOINTS) {
+  const tr = document.createElement("tr");
+  tr.innerHTML = '<td><span class="m ' + verbo + '">' + verbo + '</span></td><td>' + ruta
+    + '</td><td>' + desc + '</td><td>' + resp + '</td>';
+  document.getElementById("tabla").appendChild(tr);
+}
+const j = o => JSON.stringify(o, null, 2);
+const ejemplos = {
+  "Listar usuarios": ["GET", "/api/usuarios", ""],
+  "Crear usuario (201)": ["POST", "/api/usuarios", j({nombre:"Laura Gómez",correo:"laura.gomez@example.com"})],
+  "Crear usuario inválido (400)": ["POST", "/api/usuarios", j({nombre:"",correo:"no-es-correo"})],
+  "Reemplazar usuario (PUT)": ["PUT", "/api/usuarios/"+ID, j({nombre:"Laura Gómez R.",correo:"laura.gomez@example.com"})],
+  "Eliminar usuario (DELETE)": ["DELETE", "/api/usuarios/"+ID, ""],
+  "Listar cuentas": ["GET", "/api/cuentas", ""],
+  "Crear cuenta (201)": ["POST", "/api/cuentas", j({nombreCuenta:"Ahorros de prueba",tipoCuenta:"Ahorros",banco:"Bancolombia",idUsuario:1})],
+  "Reemplazar cuenta (PUT)": ["PUT", "/api/cuentas/"+ID, j({nombreCuenta:"Ahorros de prueba 2",tipoCuenta:"Ahorros",banco:"Bancolombia",idUsuario:1})],
+  "Eliminar cuenta (DELETE)": ["DELETE", "/api/cuentas/"+ID, ""],
+  "Listar medios de pago": ["GET", "/api/medios-pago", ""],
+  "Crear medio de pago (201)": ["POST", "/api/medios-pago", j({nombreMedioPago:"Billetera digital",entidadFinanciera:"Nequi"})],
+  "Reemplazar medio de pago (PUT)": ["PUT", "/api/medios-pago/"+ID, j({nombreMedioPago:"Billetera digital 2",entidadFinanciera:"Nequi"})],
+  "Eliminar medio de pago (DELETE)": ["DELETE", "/api/medios-pago/"+ID, ""],
+  "Listar categorías": ["GET", "/api/categorias", ""],
+  "Crear categoría (201)": ["POST", "/api/categorias", j({nombreCategoria:"Mascotas"})],
+  "Reemplazar categoría (PUT)": ["PUT", "/api/categorias/"+ID, j({nombreCategoria:"Mascotas y cuidado"})],
+  "Eliminar categoría (DELETE)": ["DELETE", "/api/categorias/"+ID, ""],
+  "Listar movimientos": ["GET", "/api/movimientos", ""],
+  "Consultar movimiento 1": ["GET", "/api/movimientos/1", ""],
+  "Movimiento inexistente (404)": ["GET", "/api/movimientos/9999", ""],
+  "Crear movimiento (201)": ["POST", "/api/movimientos", j({fecha:"2026-05-10",descripcion:"Compra de mercado",montoTotal:150000,idCuenta:1,idMedioPago:1,categorias:[{idCategoria:1,montoAsignado:100000},{idCategoria:2,montoAsignado:50000}]})],
+  "Crear movimiento inválido (400)": ["POST", "/api/movimientos", j({fecha:"2999-01-01",descripcion:"",montoTotal:-5,categorias:[]})],
+  "Reemplazar movimiento (PUT)": ["PUT", "/api/movimientos/"+ID, j({fecha:"2026-05-11",descripcion:"Descripción reemplazada",montoTotal:160000,idCuenta:1,idMedioPago:1,categorias:[{idCategoria:1,montoAsignado:160000}]})],
+  "Cambiar solo la descripción (PATCH)": ["PATCH", "/api/movimientos/"+ID, j({descripcion:"Solo cambia la descripción"})],
+  "Eliminar movimiento (DELETE)": ["DELETE", "/api/movimientos/"+ID, ""],
+  "Resumen de finanzas": ["GET", "/api/resumen", ""]
+};
+const $ = id => document.getElementById(id);
+for (const nombre of Object.keys(ejemplos)) {
+  const o = document.createElement("option"); o.textContent = nombre; $("ejemplos").appendChild(o);
+}
+$("ejemplos").onchange = () => {
+  const e = ejemplos[$("ejemplos").value]; if (!e) return;
+  $("verbo").value = e[0]; $("ruta").value = e[1]; $("cuerpo").value = e[2];
+};
+$("enviar").onclick = async () => {
+  const verbo = $("verbo").value, opciones = {method: verbo, headers: {}};
+  if (["POST","PUT","PATCH"].includes(verbo)) {
+    opciones.headers["Content-Type"] = "application/json"; opciones.body = $("cuerpo").value;
+  }
+  try {
+    const r = await fetch($("ruta").value, opciones);
+    const texto = await r.text();
+    let cuerpo = texto; try { cuerpo = JSON.stringify(JSON.parse(texto), null, 2); } catch (e) {}
+    const loc = r.headers.get("Location");
+    $("estado").textContent = r.status + " " + r.statusText + (loc ? "  (Location: " + loc + ")" : "");
+    $("salida").textContent = cuerpo || "(sin cuerpo)";
+  } catch (e) {
+    $("estado").textContent = "Error de red";
+    $("salida").textContent = "No se pudo contactar la API: " + e;
+  }
+};
+</script>
+</body>
+</html>

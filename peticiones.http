@@ -1,0 +1,104 @@
+### Pruebas de los servicios web (extension "REST Client" de VS Code)
+### En PUT, PATCH y DELETE cambie 99 por el id de un registro CREADO PARA LA PRUEBA.
+@host = http://localhost:8080
+
+### ---------- USUARIOS ----------
+GET {{host}}/api/usuarios
+###
+POST {{host}}/api/usuarios
+Content-Type: application/json
+
+{ "nombre": "Laura Gomez", "correo": "laura.gomez@example.com" }
+###
+POST {{host}}/api/usuarios
+Content-Type: application/json
+
+{ "nombre": "", "correo": "no-es-correo" }
+###
+PUT {{host}}/api/usuarios/99
+Content-Type: application/json
+
+{ "nombre": "Laura Gomez R.", "correo": "laura.gomez@example.com" }
+###
+DELETE {{host}}/api/usuarios/99
+
+### ---------- CUENTAS ----------
+GET {{host}}/api/cuentas
+###
+POST {{host}}/api/cuentas
+Content-Type: application/json
+
+{ "nombreCuenta": "Ahorros de prueba", "tipoCuenta": "Ahorros", "banco": "Bancolombia", "idUsuario": 1 }
+###
+PUT {{host}}/api/cuentas/99
+Content-Type: application/json
+
+{ "nombreCuenta": "Ahorros de prueba 2", "tipoCuenta": "Ahorros", "banco": "Bancolombia", "idUsuario": 1 }
+###
+DELETE {{host}}/api/cuentas/99
+
+### ---------- MEDIOS DE PAGO ----------
+GET {{host}}/api/medios-pago
+###
+POST {{host}}/api/medios-pago
+Content-Type: application/json
+
+{ "nombreMedioPago": "Billetera digital", "entidadFinanciera": "Nequi" }
+###
+PUT {{host}}/api/medios-pago/99
+Content-Type: application/json
+
+{ "nombreMedioPago": "Billetera digital 2", "entidadFinanciera": "Nequi" }
+###
+DELETE {{host}}/api/medios-pago/99
+
+### ---------- CATEGORIAS ----------
+GET {{host}}/api/categorias
+###
+POST {{host}}/api/categorias
+Content-Type: application/json
+
+{ "nombreCategoria": "Mascotas" }
+###
+PUT {{host}}/api/categorias/99
+Content-Type: application/json
+
+{ "nombreCategoria": "Mascotas y cuidado" }
+###
+DELETE {{host}}/api/categorias/99
+
+### ---------- MOVIMIENTOS ----------
+GET {{host}}/api/movimientos
+###
+GET {{host}}/api/movimientos/9999
+###
+POST {{host}}/api/movimientos
+Content-Type: application/json
+
+{
+  "fecha": "2026-05-10", "descripcion": "Compra de mercado", "montoTotal": 150000,
+  "idCuenta": 1, "idMedioPago": 1,
+  "categorias": [ { "idCategoria": 1, "montoAsignado": 100000 }, { "idCategoria": 2, "montoAsignado": 50000 } ]
+}
+###
+PUT {{host}}/api/movimientos/99
+Content-Type: application/json
+
+{
+  "fecha": "2026-05-11", "descripcion": "Descripcion reemplazada", "montoTotal": 160000,
+  "idCuenta": 1, "idMedioPago": 1,
+  "categorias": [ { "idCategoria": 1, "montoAsignado": 160000 } ]
+}
+###
+PATCH {{host}}/api/movimientos/99
+Content-Type: application/json
+
+{ "descripcion": "Solo cambia la descripcion" }
+###
+DELETE {{host}}/api/movimientos/99
+
+### ---------- RESUMEN ----------
+GET {{host}}/api/resumen
+
+### Verbo no permitido (405)
+PUT {{host}}/api/movimientos
